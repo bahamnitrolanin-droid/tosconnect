@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "TosConnect"
+version = "1.0.0"
+id = "artifacts/tosconnect"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22075
+
+[services.development]
+run = "pnpm --filter @workspace/tosconnect run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/tosconnect", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/tosconnect/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22075"
+BASE_PATH = "/"
