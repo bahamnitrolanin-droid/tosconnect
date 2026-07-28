@@ -87,8 +87,8 @@ export default function Home() {
                 <div className="flex justify-between items-start mb-2">
                   <Badge variant="secondary">Most Popular</Badge>
                   <div className="text-right">
-                    <div className="text-2xl font-bold font-mono text-white">$80 <span className="text-sm text-white/50 font-sans">USD</span></div>
-                    <div className="text-sm text-white/50">328,000 ៛ KHR</div>
+                    <div className="text-2xl font-bold font-mono text-white">$3 <span className="text-sm text-white/50 font-sans">USD</span></div>
+                    <div className="text-sm text-white/50">12,300 ៛ KHR</div>
                   </div>
                 </div>
                 <CardTitle className="text-2xl">Audio Mixing & Mastering</CardTitle>
@@ -129,8 +129,8 @@ export default function Home() {
                 <div className="flex justify-between items-start mb-2">
                   <Badge variant="outline" className="border-white/20">1-on-1 Session</Badge>
                   <div className="text-right">
-                    <div className="text-2xl font-bold font-mono text-white">$40 <span className="text-sm text-white/50 font-sans">USD</span></div>
-                    <div className="text-sm text-white/50">164,000 ៛ KHR</div>
+                    <div className="text-2xl font-bold font-mono text-white">$20 <span className="text-sm text-white/50 font-sans">USD</span></div>
+                    <div className="text-sm text-white/50">82,000 ៛ KHR</div>
                   </div>
                 </div>
                 <CardTitle className="text-2xl">Virtual Music Consultation</CardTitle>

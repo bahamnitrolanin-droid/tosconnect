@@ -71,19 +71,19 @@
   --sidebar: 240 5% 6%;
   --sidebar-foreground: 240 5% 96%;
   --sidebar-border: 240 5% 12%;
-  --sidebar-primary: 24 100% 50%;
-  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-primary: 48 100% 50%;
+  --sidebar-primary-foreground: 0 0% 5%;
   --sidebar-accent: 240 5% 12%;
   --sidebar-accent-foreground: 240 5% 96%;
-  --sidebar-ring: 24 100% 50%;
+  --sidebar-ring: 48 100% 50%;
 
   --popover: 240 5% 6%;
   --popover-foreground: 240 5% 96%;
   --popover-border: 240 5% 14%;
 
-  /* Amber / Gold / Orange-Red Accent */
-  --primary: 24 100% 50%;
-  --primary-foreground: 0 0% 100%;
+  /* Golden Yellow + Black — TosConnect brand */
+  --primary: 48 100% 50%;
+  --primary-foreground: 0 0% 5%;
 
   --secondary: 240 5% 12%;
   --secondary-foreground: 240 5% 96%;
@@ -98,10 +98,10 @@
   --destructive-foreground: 0 0% 100%;
 
   --input: 240 5% 16%;
-  --ring: 24 100% 50%;
-  
-  --chart-1: 24 100% 50%;
-  --chart-2: 45 100% 50%;
+  --ring: 48 100% 50%;
+
+  --chart-1: 48 100% 50%;
+  --chart-2: 354 77% 52%;
   --chart-3: 240 5% 80%;
   --chart-4: 240 5% 60%;
   --chart-5: 240 5% 40%;

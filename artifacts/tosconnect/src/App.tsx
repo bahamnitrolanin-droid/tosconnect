@@ -16,6 +16,8 @@ import RefundPolicy from "@/pages/legal/refund-policy";
 import DeliveryPolicy from "@/pages/legal/delivery-policy";
 import TermsConditions from "@/pages/legal/terms-conditions";
 import PrivacyPolicy from "@/pages/legal/privacy-policy";
+import CookiePolicy from "@/pages/legal/cookie-policy";
+import AmlPolicy from "@/pages/legal/aml-policy";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +40,8 @@ function Router() {
         <Route path="/delivery-policy" component={DeliveryPolicy} />
         <Route path="/terms-and-conditions" component={TermsConditions} />
         <Route path="/privacy-policy" component={PrivacyPolicy} />
+        <Route path="/cookie-policy" component={CookiePolicy} />
+        <Route path="/aml-policy" component={AmlPolicy} />
 
         <Route component={NotFound} />
       </Switch>

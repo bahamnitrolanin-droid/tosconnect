@@ -104,8 +104,8 @@ export default function MixingMasteringPage() {
           email: values.email,
           details: values.details,
           stemsUrls: objectPaths,
-          amountUsd: 80,
-          amountKhr: 328000
+          amountUsd: 3,
+          amountKhr: 12300
         }
       })
 

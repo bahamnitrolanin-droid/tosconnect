@@ -65,8 +65,8 @@ export default function ConsultationPage() {
           email: values.email,
           sessionTopic: values.sessionTopic,
           preferredTimes: values.preferredTimes,
-          amountUsd: 40,
-          amountKhr: 164000
+          amountUsd: 20,
+          amountKhr: 82000
         }
       })
       // Create PayWay KHQR transaction and redirect to checkout
