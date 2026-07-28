@@ -9,6 +9,8 @@ import MixingMasteringPage from "@/pages/mixing-mastering";
 import ConsultationPage from "@/pages/consultation";
 import TrackOrderPage from "@/pages/track-order";
 import AdminPage from "@/pages/admin";
+import CheckoutPage from "@/pages/checkout";
+import { OrderConfirmedPage, BookingConfirmedPage } from "@/pages/order-confirmed";
 
 import RefundPolicy from "@/pages/legal/refund-policy";
 import DeliveryPolicy from "@/pages/legal/delivery-policy";
@@ -26,12 +28,17 @@ function Router() {
         <Route path="/services/consultation" component={ConsultationPage} />
         <Route path="/track-order" component={TrackOrderPage} />
         <Route path="/admin" component={AdminPage} />
-        
+
+        {/* Payment flow */}
+        <Route path="/checkout/:transactionId" component={CheckoutPage} />
+        <Route path="/order-confirmed/order/:orderId" component={OrderConfirmedPage} />
+        <Route path="/order-confirmed/booking/:bookingId" component={BookingConfirmedPage} />
+
         <Route path="/refund-policy" component={RefundPolicy} />
         <Route path="/delivery-policy" component={DeliveryPolicy} />
         <Route path="/terms-and-conditions" component={TermsConditions} />
         <Route path="/privacy-policy" component={PrivacyPolicy} />
-        
+
         <Route component={NotFound} />
       </Switch>
     </Layout>

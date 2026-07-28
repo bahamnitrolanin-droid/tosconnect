@@ -346,6 +346,63 @@ export const AdminGetStatsResponse = zod.object({
 
 
 /**
+ * @summary Create a KHQR payment transaction
+ */
+export const CreateTransactionBody = zod.object({
+  "orderId": zod.string().optional(),
+  "bookingId": zod.string().optional()
+})
+
+export const CreateTransactionResponse = zod.object({
+  "transactionId": zod.string(),
+  "qrImage": zod.string().describe('Base64 data URL of the KHQR QR code image'),
+  "expiresAt": zod.coerce.date(),
+  "amountUsd": zod.number(),
+  "amountKhr": zod.number()
+})
+
+
+/**
+ * @summary Poll transaction payment status
+ */
+export const GetTransactionStatusParams = zod.object({
+  "transactionId": zod.coerce.string()
+})
+
+export const GetTransactionStatusResponse = zod.object({
+  "transactionId": zod.string(),
+  "status": zod.enum(['pending', 'paid', 'expired', 'failed']),
+  "orderId": zod.string().optional(),
+  "bookingId": zod.string().optional(),
+  "expiresAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary ABA PayWay webhook callback receiver (verified internally via HMAC)
+ */
+export const HandlePaywayCallbackResponse = zod.object({
+  "received": zod.boolean()
+})
+
+
+/**
+ * @summary Generate a fresh KHQR for an expired or failed transaction
+ */
+export const RetryTransactionParams = zod.object({
+  "transactionId": zod.coerce.string()
+})
+
+export const RetryTransactionResponse = zod.object({
+  "transactionId": zod.string(),
+  "qrImage": zod.string().describe('Base64 data URL of the KHQR QR code image'),
+  "expiresAt": zod.coerce.date(),
+  "amountUsd": zod.number(),
+  "amountKhr": zod.number()
+})
+
+
+/**
  * @summary Request a presigned URL for file upload
  */
 

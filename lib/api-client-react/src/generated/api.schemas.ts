@@ -195,6 +195,42 @@ export interface AdminAuthResult {
   token: string;
 }
 
+export interface CreateTransactionInput {
+  orderId?: string;
+  bookingId?: string;
+}
+
+export interface TransactionCreated {
+  transactionId: string;
+  /** Base64 data URL of the KHQR QR code image */
+  qrImage: string;
+  expiresAt: string;
+  amountUsd: number;
+  amountKhr: number;
+}
+
+export type TransactionStatusStatus = typeof TransactionStatusStatus[keyof typeof TransactionStatusStatus];
+
+
+export const TransactionStatusStatus = {
+  pending: 'pending',
+  paid: 'paid',
+  expired: 'expired',
+  failed: 'failed',
+} as const;
+
+export interface TransactionStatus {
+  transactionId: string;
+  status: TransactionStatusStatus;
+  orderId?: string;
+  bookingId?: string;
+  expiresAt: string;
+}
+
+export interface CallbackAck {
+  received: boolean;
+}
+
 export interface UploadUrlRequest {
   /**
      * Original file name.

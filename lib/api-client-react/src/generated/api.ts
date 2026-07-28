@@ -29,6 +29,8 @@ import type {
   Booking,
   BookingInput,
   BookingUpdate,
+  CallbackAck,
+  CreateTransactionInput,
   DashboardStats,
   ErrorEnvelope,
   HealthStatus,
@@ -37,6 +39,8 @@ import type {
   OrderStatus,
   OrderTrackInput,
   OrderUpdate,
+  TransactionCreated,
+  TransactionStatus,
   UploadUrlRequest,
   UploadUrlResponse
 } from './api.schemas';
@@ -973,6 +977,296 @@ export function useAdminGetStats<TData = Awaited<ReturnType<typeof adminGetStats
 
 
 
+
+export const getCreateTransactionUrl = () => {
+
+
+
+
+  return `/api/payway/create-transaction`
+}
+
+/**
+ * @summary Create a KHQR payment transaction
+ */
+export const createTransaction = async (createTransactionInput: CreateTransactionInput, options?: Parameters<typeof customFetch>[1]): Promise<TransactionCreated> => {
+
+  return customFetch<TransactionCreated>(getCreateTransactionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createTransactionInput)
+  }
+);}
+
+
+
+
+
+export const getCreateTransactionMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTransaction>>, TError,{data: BodyType<CreateTransactionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createTransaction>>, TError,{data: BodyType<CreateTransactionInput>}, TContext> => {
+
+const mutationKey = ['createTransaction'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createTransaction>>, {data: BodyType<CreateTransactionInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createTransaction(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateTransactionMutationResult = NonNullable<Awaited<ReturnType<typeof createTransaction>>>
+    export type CreateTransactionMutationBody = BodyType<CreateTransactionInput>
+    export type CreateTransactionMutationError = ErrorType<ErrorEnvelope>
+
+    /**
+ * @summary Create a KHQR payment transaction
+ */
+export const useCreateTransaction = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTransaction>>, TError,{data: BodyType<CreateTransactionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createTransaction>>,
+        TError,
+        {data: BodyType<CreateTransactionInput>},
+        TContext
+      > => {
+      return useMutation(getCreateTransactionMutationOptions(options));
+    }
+
+export const getGetTransactionStatusUrl = (transactionId: string,) => {
+
+
+
+
+  return `/api/payway/transaction-status/${transactionId}`
+}
+
+/**
+ * @summary Poll transaction payment status
+ */
+export const getTransactionStatus = async (transactionId: string, options?: Parameters<typeof customFetch>[1]): Promise<TransactionStatus> => {
+
+  return customFetch<TransactionStatus>(getGetTransactionStatusUrl(transactionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTransactionStatusQueryKey = (transactionId: string,) => {
+    return [
+    `/api/payway/transaction-status/${transactionId}`
+    ] as const;
+    }
+
+
+export const getGetTransactionStatusQueryOptions = <TData = Awaited<ReturnType<typeof getTransactionStatus>>, TError = ErrorType<ErrorEnvelope>>(transactionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTransactionStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTransactionStatusQueryKey(transactionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTransactionStatus>>> = ({ signal }) => getTransactionStatus(transactionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: transactionId !== null && transactionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTransactionStatus>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTransactionStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getTransactionStatus>>>
+export type GetTransactionStatusQueryError = ErrorType<ErrorEnvelope>
+
+
+/**
+ * @summary Poll transaction payment status
+ */
+
+export function useGetTransactionStatus<TData = Awaited<ReturnType<typeof getTransactionStatus>>, TError = ErrorType<ErrorEnvelope>>(
+ transactionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTransactionStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTransactionStatusQueryOptions(transactionId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getHandlePaywayCallbackUrl = () => {
+
+
+
+
+  return `/api/payway/callback`
+}
+
+/**
+ * @summary ABA PayWay webhook callback receiver (verified internally via HMAC)
+ */
+export const handlePaywayCallback = async ( options?: Parameters<typeof customFetch>[1]): Promise<CallbackAck> => {
+
+  return customFetch<CallbackAck>(getHandlePaywayCallbackUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getHandlePaywayCallbackMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof handlePaywayCallback>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof handlePaywayCallback>>, TError,void, TContext> => {
+
+const mutationKey = ['handlePaywayCallback'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof handlePaywayCallback>>, void> = () => {
+
+
+          return  handlePaywayCallback(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type HandlePaywayCallbackMutationResult = NonNullable<Awaited<ReturnType<typeof handlePaywayCallback>>>
+
+    export type HandlePaywayCallbackMutationError = ErrorType<unknown>
+
+    /**
+ * @summary ABA PayWay webhook callback receiver (verified internally via HMAC)
+ */
+export const useHandlePaywayCallback = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof handlePaywayCallback>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof handlePaywayCallback>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getHandlePaywayCallbackMutationOptions(options));
+    }
+
+export const getRetryTransactionUrl = (transactionId: string,) => {
+
+
+
+
+  return `/api/payway/retry/${transactionId}`
+}
+
+/**
+ * @summary Generate a fresh KHQR for an expired or failed transaction
+ */
+export const retryTransaction = async (transactionId: string, options?: Parameters<typeof customFetch>[1]): Promise<TransactionCreated> => {
+
+  return customFetch<TransactionCreated>(getRetryTransactionUrl(transactionId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRetryTransactionMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retryTransaction>>, TError,{transactionId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof retryTransaction>>, TError,{transactionId: string}, TContext> => {
+
+const mutationKey = ['retryTransaction'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof retryTransaction>>, {transactionId: string}> = (props) => {
+          const {transactionId} = props ?? {};
+
+          return  retryTransaction(transactionId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RetryTransactionMutationResult = NonNullable<Awaited<ReturnType<typeof retryTransaction>>>
+
+    export type RetryTransactionMutationError = ErrorType<ErrorEnvelope>
+
+    /**
+ * @summary Generate a fresh KHQR for an expired or failed transaction
+ */
+export const useRetryTransaction = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retryTransaction>>, TError,{transactionId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof retryTransaction>>,
+        TError,
+        {transactionId: string},
+        TContext
+      > => {
+      return useMutation(getRetryTransactionMutationOptions(options));
+    }
 
 export const getRequestUploadUrlUrl = () => {
 

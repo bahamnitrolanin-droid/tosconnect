@@ -16,6 +16,8 @@ tags:
     description: Consultation bookings
   - name: admin
     description: Admin management endpoints
+  - name: payway
+    description: ABA PayWay KHQR payment endpoints
   - name: Storage
     description: Object storage upload and serving endpoints.
   - name: stats
@@ -346,6 +348,112 @@ paths:
                 $ref: "#/components/schemas/DashboardStats"
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /payway/create-transaction:
+    post:
+      operationId: createTransaction
+      tags: [payway]
+      summary: Create a KHQR payment transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTransactionInput"
+      responses:
+        "201":
+          description: Transaction created, QR code ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionCreated"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Order or booking not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: Already paid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /payway/transaction-status/{transactionId}:
+    get:
+      operationId: getTransactionStatus
+      tags: [payway]
+      summary: Poll transaction payment status
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionStatus"
+        "404":
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /payway/callback:
+    post:
+      operationId: handlePaywayCallback
+      tags: [payway]
+      summary: ABA PayWay webhook callback receiver (verified internally via HMAC)
+      responses:
+        "200":
+          description: Callback received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CallbackAck"
+
+  /payway/retry/{transactionId}:
+    post:
+      operationId: retryTransaction
+      tags: [payway]
+      summary: Generate a fresh KHQR for an expired or failed transaction
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: New transaction created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionCreated"
+        "404":
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: Cannot retry — transaction is not expired/failed
           content:
             application/json:
               schema:
@@ -699,6 +807,55 @@ components:
       properties:
         token:
           type: string
+
+    CreateTransactionInput:
+      type: object
+      properties:
+        orderId:
+          type: string
+        bookingId:
+          type: string
+
+    TransactionCreated:
+      type: object
+      required: [transactionId, qrImage, expiresAt, amountUsd, amountKhr]
+      properties:
+        transactionId:
+          type: string
+        qrImage:
+          type: string
+          description: Base64 data URL of the KHQR QR code image
+        expiresAt:
+          type: string
+          format: date-time
+        amountUsd:
+          type: number
+        amountKhr:
+          type: number
+
+    TransactionStatus:
+      type: object
+      required: [transactionId, status, expiresAt]
+      properties:
+        transactionId:
+          type: string
+        status:
+          type: string
+          enum: [pending, paid, expired, failed]
+        orderId:
+          type: string
+        bookingId:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    CallbackAck:
+      type: object
+      required: [received]
+      properties:
+        received:
+          type: boolean
 
     UploadUrlRequest:
       type: object

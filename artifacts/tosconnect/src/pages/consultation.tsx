@@ -18,8 +18,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useCreateBooking } from "@workspace/api-client-react"
+import { useCreateBooking, useCreateTransaction } from "@workspace/api-client-react"
 import { Badge } from "@/components/ui/badge"
+import { useLocation } from "wouter"
+import { savePendingTransaction } from "@/lib/payway"
 
 const timeSlots = [
   { id: "weekday-morning", label: "Weekday Morning (9AM - 12PM)" },
@@ -38,8 +40,11 @@ const formSchema = z.object({
 })
 
 export default function ConsultationPage() {
-  const [bookingId, setBookingId] = React.useState<string | null>(null)
+  const [submitError, setSubmitError] = React.useState<string | null>(null)
+  const [, navigate] = useLocation()
+
   const createBooking = useCreateBooking()
+  const createTransaction = useCreateTransaction()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,6 +57,7 @@ export default function ConsultationPage() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setSubmitError(null)
     try {
       const booking = await createBooking.mutateAsync({
         data: {
@@ -63,40 +69,27 @@ export default function ConsultationPage() {
           amountKhr: 164000
         }
       })
-      setBookingId(booking.id)
+      // Create PayWay KHQR transaction and redirect to checkout
+      const txn = await createTransaction.mutateAsync({
+        data: { bookingId: booking.id }
+      })
+      savePendingTransaction({
+        transactionId: txn.transactionId,
+        qrImage: txn.qrImage,
+        expiresAt: txn.expiresAt,
+        amountUsd: txn.amountUsd,
+        amountKhr: txn.amountKhr,
+        serviceType: "booking",
+      })
+      navigate(`/checkout/${txn.transactionId}`)
     } catch (error) {
       console.error("Failed to submit booking", error)
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again."
+      )
     }
-  }
-
-  if (bookingId) {
-    return (
-      <div className="container max-w-2xl py-24 px-4">
-        <Card className="border-primary/50 text-center animate-in zoom-in duration-500">
-          <CardHeader className="pt-12">
-            <div className="mx-auto w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mb-4">
-              <CheckCircle2 className="w-8 h-8 text-blue-500" />
-            </div>
-            <CardTitle className="text-3xl text-white">Booking Requested</CardTitle>
-            <CardDescription className="text-lg">Booking ID: <span className="font-mono text-blue-400">{bookingId}</span></CardDescription>
-          </CardHeader>
-          <CardContent className="pb-12 space-y-4">
-            <p className="text-white/80">
-              We've received your consultation request. We will review your preferred times and reach out shortly.
-            </p>
-            <div className="p-6 bg-card-border/50 rounded-lg border border-white/10 max-w-md mx-auto">
-              <p className="font-medium text-white mb-2">Next Steps:</p>
-              <p className="text-white/60 text-sm">
-                Payment instructions and the Zoom meeting link will be emailed to you within 24 hours.
-              </p>
-              <p className="text-white/40 text-xs mt-4">
-                All payments processed securely via ABA PayWay KHQR.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
   }
 
   return (

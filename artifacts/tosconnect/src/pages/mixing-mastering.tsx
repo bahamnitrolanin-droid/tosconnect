@@ -17,8 +17,10 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { useCreateOrder, useRequestUploadUrl } from "@workspace/api-client-react"
+import { useCreateOrder, useRequestUploadUrl, useCreateTransaction } from "@workspace/api-client-react"
 import { Badge } from "@/components/ui/badge"
+import { useLocation } from "wouter"
+import { savePendingTransaction } from "@/lib/payway"
 
 const MAX_FILE_SIZE = 200 * 1024 * 1024 // 200MB
 const ACCEPTED_FILE_TYPES = ["audio/wav", "audio/mpeg", "audio/mp3", "application/zip", "application/x-zip-compressed"]
@@ -33,10 +35,12 @@ const formSchema = z.object({
 export default function MixingMasteringPage() {
   const [uploadProgress, setUploadProgress] = React.useState<number>(0)
   const [isUploading, setIsUploading] = React.useState(false)
-  const [orderId, setOrderId] = React.useState<string | null>(null)
-  
+  const [submitError, setSubmitError] = React.useState<string | null>(null)
+  const [, navigate] = useLocation()
+
   const createOrder = useCreateOrder()
   const requestUploadUrl = useRequestUploadUrl()
+  const createTransaction = useCreateTransaction()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,6 +52,7 @@ export default function MixingMasteringPage() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setSubmitError(null)
     try {
       setIsUploading(true)
       const fileList = Array.from(values.files as FileList)
@@ -104,45 +109,30 @@ export default function MixingMasteringPage() {
         }
       })
 
-      setOrderId(order.id)
+      // 4. Create PayWay KHQR transaction and redirect to checkout
+      const txn = await createTransaction.mutateAsync({
+        data: { orderId: order.id }
+      })
+      savePendingTransaction({
+        transactionId: txn.transactionId,
+        qrImage: txn.qrImage,
+        expiresAt: txn.expiresAt,
+        amountUsd: txn.amountUsd,
+        amountKhr: txn.amountKhr,
+        serviceType: "order",
+      })
+      navigate(`/checkout/${txn.transactionId}`)
     } catch (error) {
       console.error("Failed to submit order", error)
-      // We would normally show a toast here
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again."
+      )
     } finally {
       setIsUploading(false)
       setUploadProgress(0)
     }
-  }
-
-  if (orderId) {
-    return (
-      <div className="container max-w-2xl py-24 px-4">
-        <Card className="border-primary/50 text-center animate-in zoom-in duration-500">
-          <CardHeader className="pt-12">
-            <div className="mx-auto w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4">
-              <CheckCircle2 className="w-8 h-8 text-primary" />
-            </div>
-            <CardTitle className="text-3xl text-white">Order Confirmed</CardTitle>
-            <CardDescription className="text-lg">Order ID: <span className="font-mono text-primary">{orderId}</span></CardDescription>
-          </CardHeader>
-          <CardContent className="pb-12 space-y-4">
-            <p className="text-white/80">
-              Thank you for trusting TosConnect with your music. 
-              Your files have been securely uploaded.
-            </p>
-            <div className="p-6 bg-card-border/50 rounded-lg border border-white/10 max-w-md mx-auto">
-              <p className="font-medium text-white mb-2">Next Steps:</p>
-              <p className="text-white/60 text-sm">
-                Payment instructions will arrive at your email shortly. 
-              </p>
-              <p className="text-white/40 text-xs mt-4">
-                All payments processed securely via ABA PayWay KHQR.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
   }
 
   return (
