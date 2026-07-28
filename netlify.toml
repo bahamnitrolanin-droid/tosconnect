@@ -1,0 +1,15 @@
+[build]
+  # Build only the tosconnect frontend; skip api-server and mockup-sandbox
+  command = "pnpm --filter @workspace/tosconnect run build"
+  publish = "artifacts/tosconnect/dist/public"
+
+[build.environment]
+  NODE_ENV = "production"
+  # Serve at the root on Netlify (no subfolder routing needed)
+  BASE_PATH = "/"
+
+# SPA fallback — all paths route to index.html so wouter handles client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
